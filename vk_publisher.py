@@ -20,8 +20,8 @@ def get_args():
     }, help=argparse.SUPPRESS)
     parser.add_argument('--img_dir', default='images',  help='Define image folder default=images')
     args = parser.parse_args()
-
     return args
+
 
 def get_comic():
     """
@@ -36,7 +36,6 @@ def get_comic():
             raise requests.exceptions.HTTPError(resp['error'])
         comic = resp.json()
         img_id = random.choice(range(comic.get('num')))
-        url = f'{args.api}{img_id}/info.0.json'
     else:
         img_id = args.img_id
     url = f'{args.api}{img_id}/info.0.json'
@@ -75,7 +74,7 @@ def vk_post_pic_onto_wall(comic_file):
 
     group_id = vk_reponse.get('items')[0].get('id')
     url = f'https://api.vk.com/method/{method[1]}'
-    params.update({'group_id':group_id})
+    params.update({'group_id': group_id})
     del params['extended'], params['user_id']
     vk_reponse = vk_request('get', url, params, None).get('response')
 
@@ -89,7 +88,7 @@ def vk_post_pic_onto_wall(comic_file):
     params.update({'hash': vk_reponse.get('hash')})
     params.update({'user_id': vk_user_id})
     params.update({'caption': 'Random comics'})
-    url = f'https://api.vk.com/method/{method[2]}' # SaveWallPhoto
+    url = f'https://api.vk.com/method/{method[2]}'
     vk_reponse = vk_request('get', url, params, None).get('response')[0]
 
     vk_media_id = vk_reponse.get('id')

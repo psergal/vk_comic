@@ -24,8 +24,8 @@ def load_n_store(links, image_name, folder):
 
 
 def save_img(img_name, img_content, folder):
-    cur_dir = os.path.dirname(__file__)
-    image_path = os.path.join(cur_dir, folder)
+    cur_dir = pathlib.PurePath(__file__).parent
+    image_path = cur_dir.joinpath(cur_dir, folder)
     pathlib.Path(image_path).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(image_path, img_name), 'wb') as q:
         q.write(img_content)
