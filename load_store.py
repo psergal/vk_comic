@@ -1,5 +1,4 @@
 import requests
-import os
 import pathlib
 
 
@@ -27,7 +26,7 @@ def save_img(img_name, img_content, folder):
     cur_dir = pathlib.PurePath(__file__).parent
     image_path = cur_dir.joinpath(cur_dir, folder)
     pathlib.Path(image_path).mkdir(parents=True, exist_ok=True)
-    with open(os.path.join(image_path, img_name), 'wb') as q:
+    with open(image_path.joinpath(image_path, img_name), 'wb') as q:
         q.write(img_content)
 
 
