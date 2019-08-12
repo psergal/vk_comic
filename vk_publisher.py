@@ -50,22 +50,22 @@ def get_comic():
     return {'file': written_files, 'comments': alt, 'dir': args.img_dir}
 
 
-def vk_request(method, url, params, files):
-    if method == 'get':
-        resp = requests.get(url, params=params)
-    elif method == 'post':
-        resp = requests.post(url, files=files)
-    resp.raise_for_status()
-    json_resp = resp.json()
+def vk_request(vk_method, vk_url, vk_params, vk_files):
+    if vk_method == 'get':
+        vk_resp = requests.get(vk_url, params=vk_params)
+    elif vk_method == 'post':
+        vk_resp = requests.post(vk_url, files=vk_files)
+    vk_resp.raise_for_status()
+    json_resp = vk_resp.json()
     if 'error' in json_resp:
         raise requests.exceptions.HTTPError(json_resp['error'])
     return json_resp
 
 
-def vk_post_pic_onto_wall(comic_file):
+def vk_post_pic_onto_wall(comics_file):
     extended = 1
     cur_dir = pathlib.PurePath(__file__).parent
-    img_path = cur_dir.joinpath(comic_file['dir'], comic_file['file'])
+    img_path = cur_dir.joinpath(comics_file['dir'], comics_file['file'])
     version = '5.101'
     method = ['groups.get', 'photos.getWallUploadServer', 'photos.saveWallPhoto', 'wall.post']
     params = {'user_id': vk_user_id, 'extended': extended, 'access_token': vk_access_token, 'v': version}
