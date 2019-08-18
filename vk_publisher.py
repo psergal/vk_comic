@@ -9,7 +9,7 @@ import pathlib
 
 def get_args():
     parser = argparse.ArgumentParser(description='Downloading comics from xkcd.com')
-    parser.add_argument('--img_name', default='python',  help='Define image name default=python')
+    parser.add_argument('--img_name', default='comic',  help='Define image name default=python')
     parser.add_argument('--img_id',   help='Define image id if empty then random')
     parser.add_argument('--img_dir', default='images',  help='Define image folder default=images')
     arguments = parser.parse_args()

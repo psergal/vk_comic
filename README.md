@@ -30,19 +30,20 @@ It takes args.
 * `img_name` - File name which is used for file operations
 * `img_id` - Can be skipped and has random value
 * `img_dir` are used for for file operations
-* `api` and `headers` are used for configuration
 
-Module can be executed within default arguments 
+Module can be executed within default arguments  
+Without arguments app downloads random picture from source  
+The picture will be saved in specified folder with specified name  
+App posts the comic picture to the wall and deletes temporary folder 
 
 just type `python vk_publisher.py`  
 or with args `python vk_publisher.py --img_name comic `
 
-It should output id of the posted message.  
+It should output id of the posted message if everything is ok  
 
 You can check the published comics on your personal wall  
  on [vk.com](https://vk.com)
  
-
 
 ## Project Goals
 The code is written for educational purposes on online-course for web-developers [dvmn.org](https://dvmn.org/modules/)
