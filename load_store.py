@@ -9,14 +9,12 @@ def load_n_store(links, image_name, folder):
     with name's boilerplate :image_name
     into the folder that was passed in the :folder parameter
     """
-    if len(links) < 1:
-        return None
     list_of_files = []
     for image_enum, link in enumerate(links):
         img_name = f'{image_name}{image_enum}{pathlib.Path(link).suffix}'
         img_content = download_img(link)
         if img_content is None:
-            list_of_files.append('None')
+            raise ValueError('There are no content in the links')
         save_img(img_name, img_content, folder)
         list_of_files.append(img_name)
     return list_of_files
@@ -32,10 +30,14 @@ def save_img(img_name, img_content, folder):
 
 def download_img(link):
     resp = requests.get(link)
+    resp.raise_for_status()
     if not resp.ok:
-        return None
+        return
     return resp.content
 
 
 if __name__ == '__main__':
-    load_n_store([], '', '')
+    urls = ['https://imgs.xkcd.com/comics/woodpecker111.png']
+    pic_name = 'comic_pict'
+    dir_name = 'pict'
+    load_n_store(urls, pic_name, dir_name)

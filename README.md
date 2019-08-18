@@ -1,14 +1,21 @@
 # Posting comics to VK.COM
 ***
 ## Brief introduction
-THis is a training project for better understanding how handling with API services.
-Site which donates comics is [xkcd.com](https://xkcd.com/)  
-Site for posting comics is [vk.com](https://vk.com) 
+It is a training _Python_ project for better understanding  
+of how to handle API services.  
+It takes a picture from one place and sends to another via API  
+The source site is [xkcd.com](https://xkcd.com/)  
+The destination site for posting comics is [vk.com](https://vk.com) 
 
 
 ## Installing
-Requirements.txt contain all libraries that are needed for executing  
+Python 3.7 is used as an interpreter.  
+`requirements.txt` contain all other libraries needed for setup  
+It is easy to install by typing `pip install requirements.txt`  
 Registration is required for the access to [vk.com](https://vk.com) API   
+It is needed to have an account and a group for publishing  pictures  
+[Dev page](https://vk.com/dev) contain the information for developers.  
+You have to register a standalone application  
 After the application has been registered you will get several key files  
 It is needed to create `.env` file for retain key information:
 

@@ -11,43 +11,38 @@ def get_args():
     parser = argparse.ArgumentParser(description='Downloading comics from xkcd.com')
     parser.add_argument('--img_name', default='python',  help='Define image name default=python')
     parser.add_argument('--img_id',   help='Define image id if empty then random')
-    parser.add_argument('--api', default='https://xkcd.com/', help=argparse.SUPPRESS)
-    parser.add_argument('--headers', default={
-        'User-Agent': 'curl',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json;charset=UTF-8',
-        'Connection': 'Keep-Alive'
-    }, help=argparse.SUPPRESS)
     parser.add_argument('--img_dir', default='images',  help='Define image folder default=images')
-    args = parser.parse_args()
-    return args
+    arguments = parser.parse_args()
+    return arguments
 
 
-def get_comic():
+def get_comic(xkcd_img_name, xkcd_img_id,  xkcd_dir):
     """
-    Function downloads json files with comic
-    :return:
+    Function downloads comic picture given by API of xkcd.com-site
+    :return: dictionary with downloaded file. comment for comic and folder where picture was stored
     """
-    args = get_args()
-    if args.img_id is None:
-        url = f'{args.api}info.0.json'
-        resp = requests.get(url,  headers=args.headers)
-        if not resp.ok:
-            raise requests.exceptions.HTTPError(resp['error'])
+    xkcd_api = 'https://xkcd.com/'
+    headers = {
+    'User-Agent': 'curl',
+    'Accept': 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8',
+    'Connection': 'Keep-Alive'
+    }
+    if xkcd_img_id is None:
+        url = f'{xkcd_api}info.0.json'
+        resp = requests.get(url,  headers=headers)
+        resp.raise_for_status()
         comic = resp.json()
-        img_id = random.choice(range(comic.get('num')))
-    else:
-        img_id = args.img_id
-    url = f'{args.api}{img_id}/info.0.json'
-    resp = requests.get(url, headers=args.headers)
-    if not resp.ok:
-        raise requests.exceptions.HTTPError(resp['error'])
+        xkcd_img_id = random.randint(0, comic['num'])
+    url = f'{xkcd_api}{xkcd_img_id}/info.0.json'
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
     comic = resp.json()
 
     img_links = [comic.get('img')]
     alt = comic.get('alt')
-    written_files = ls.load_n_store(img_links, f'{args.img_name}_{img_id}', args.img_dir)[0]
-    return {'file': written_files, 'comments': alt, 'dir': args.img_dir}
+    written_files = ls.load_n_store(img_links, f'{xkcd_img_name}_{xkcd_img_id}', xkcd_dir)[0]
+    return {'file': written_files, 'comments': alt, 'dir': xkcd_dir}
 
 
 def vk_request(vk_method, vk_url, vk_params, vk_files):
@@ -62,7 +57,7 @@ def vk_request(vk_method, vk_url, vk_params, vk_files):
     return json_resp
 
 
-def vk_post_pic_onto_wall(comics_file):
+def post_pic_onto_vk_wall(comics_file, vk_access_token, vk_user_id):
     extended = 1
     cur_dir = pathlib.PurePath(__file__).parent
     img_path = cur_dir.joinpath(comics_file['dir'], comics_file['file'])
@@ -70,29 +65,29 @@ def vk_post_pic_onto_wall(comics_file):
     method = ['groups.get', 'photos.getWallUploadServer', 'photos.saveWallPhoto', 'wall.post']
     params = {'user_id': vk_user_id, 'extended': extended, 'access_token': vk_access_token, 'v': version}
     url = f'https://api.vk.com/method/{method[0]}'
-    vk_reponse = vk_request('get', url, params, None).get('response')
+    vk_reponse = vk_request('get', url, params, None)['response']
 
-    group_id = vk_reponse.get('items')[0].get('id')
+    group_id = vk_reponse['items'][0]['id']
     url = f'https://api.vk.com/method/{method[1]}'
     params.update({'group_id': group_id})
     del params['extended'], params['user_id']
-    vk_reponse = vk_request('get', url, params, None).get('response')
+    vk_reponse = vk_request('get', url, params, None)['response']
 
     upload_url = vk_reponse.get('upload_url')
     with open(img_path, 'rb') as file:
         files = {'photo': file}
         vk_reponse = vk_request('post', upload_url, None, files)
 
-    params.update({'server': vk_reponse.get('server')})
-    params.update({'photo': vk_reponse.get('photo')})
-    params.update({'hash': vk_reponse.get('hash')})
+    params.update({'server': vk_reponse['server']})
+    params.update({'photo': vk_reponse['photo']})
+    params.update({'hash': vk_reponse['hash']})
     params.update({'user_id': vk_user_id})
     params.update({'caption': 'Random comics'})
     url = f'https://api.vk.com/method/{method[2]}'
-    vk_reponse = vk_request('get', url, params, None).get('response')[0]
+    vk_reponse = vk_request('get', url, params, None)['response'][0]
 
-    vk_media_id = vk_reponse.get('id')
-    vk_owner_id = vk_reponse.get('owner_id')
+    vk_media_id = vk_reponse['id']
+    vk_owner_id = vk_reponse['owner_id']
     params.update({'message': comic_file['comments']})
     params.update({'owner_id': f'-{group_id}'})
     params.update({'from_group': '1'})
@@ -102,12 +97,17 @@ def vk_post_pic_onto_wall(comics_file):
     vk_reponse = vk_request('get', url, params, None)
     del_path = pathlib.Path(img_path)
     del_path.unlink()
-    print(vk_reponse)
+    return vk_reponse
 
 
 if __name__ == '__main__':
     load_dotenv()
-    vk_access_token = getenv('VK_ACCESS_TOKEN')
-    vk_user_id = getenv('VK_ID')
-    comic_file = get_comic()
-    vk_post_pic_onto_wall(comic_file)
+    access_token = getenv('VK_ACCESS_TOKEN')
+    user_id = getenv('VK_ID')
+    args = get_args()
+    img_id = args.img_id
+    dir = args.img_dir
+    img_name = args.img_name
+    comic_file = get_comic(img_name, img_id,  dir)
+    vk_post = post_pic_onto_vk_wall(comic_file, access_token, user_id)
+    print(vk_post)
