@@ -13,8 +13,6 @@ def load_n_store(links, image_name, folder):
     for image_enum, link in enumerate(links):
         img_name = f'{image_name}{image_enum}{pathlib.Path(link).suffix}'
         img_content = download_img(link)
-        if img_content is None:
-            raise ValueError('There are no content in the links')
         save_img(img_name, img_content, folder)
         list_of_files.append(img_name)
     return list_of_files
@@ -31,13 +29,11 @@ def save_img(img_name, img_content, folder):
 def download_img(link):
     resp = requests.get(link)
     resp.raise_for_status()
-    if not resp.ok:
-        return
     return resp.content
 
 
 if __name__ == '__main__':
-    urls = ['https://imgs.xkcd.com/comics/woodpecker111.png']
+    urls = ['https://imgs.xkcd.com/comics/woodpecker.png']
     pic_name = 'comic_pict'
     dir_name = 'pict'
     load_n_store(urls, pic_name, dir_name)
