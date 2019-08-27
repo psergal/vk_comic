@@ -65,9 +65,9 @@ def call_vk_api(vk_method, vk_url, vk_params, vk_files):
 def post_pic_onto_vk_wall(comics_file, vk_access_token, vk_user_id):
     cur_dir = pathlib.PurePath(__file__).parent
     img_path = cur_dir.joinpath(comics_file['dir'], comics_file['file'])
-    base_params = {'access_token': vk_access_token, 'v': '5.101'}
+    base_params = {'user_id': vk_user_id, 'access_token': vk_access_token, 'v': '5.101'}
     params = base_params.copy()
-    params.update({'user_id': vk_user_id, 'extended': 1})
+    params.update({'extended': 1})
     url = 'https://api.vk.com/method/groups.get'
     vk_reponse = call_vk_api('get', url, params, None)['response']
 
@@ -85,7 +85,6 @@ def post_pic_onto_vk_wall(comics_file, vk_access_token, vk_user_id):
     params.update({'server': vk_reponse['server'],
                    'photo': vk_reponse['photo'],
                    'hash': vk_reponse['hash'],
-                   'user_id': vk_user_id,
                    'caption': 'Random comics',
                    'group_id': group_id
                    })
