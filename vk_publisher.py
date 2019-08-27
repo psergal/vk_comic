@@ -63,46 +63,43 @@ def call_vk_api(vk_method, vk_url, vk_params, vk_files):
 
 
 def post_pic_onto_vk_wall(comics_file, vk_access_token, vk_user_id):
-    extended = 1
     cur_dir = pathlib.PurePath(__file__).parent
     img_path = cur_dir.joinpath(comics_file['dir'], comics_file['file'])
-    version = '5.101'
-
-    params = {'user_id': vk_user_id, 'extended': extended, 'access_token': vk_access_token, 'v': version}
+    base_params = {'access_token': vk_access_token, 'v': '5.101'}
+    params = base_params.copy()
+    params.update({'user_id': vk_user_id, 'extended': 1})
     url = 'https://api.vk.com/method/groups.get'
     vk_reponse = call_vk_api('get', url, params, None)['response']
 
     group_id = vk_reponse['items'][0]['id']
-    url = 'https://api.vk.com/method/photos.getWallUploadServer'
+    params = base_params.copy()
     params.update({'group_id': group_id})
-    del params['extended'], params['user_id']
+    url = 'https://api.vk.com/method/photos.getWallUploadServer'
     vk_reponse = call_vk_api('get', url, params, None)['response']
 
     upload_url = vk_reponse['upload_url']
     with open(img_path, 'rb') as file:
         files = {'photo': file}
         vk_reponse = call_vk_api('post', upload_url, None, files)
-
+    params = base_params.copy()
     params.update({'server': vk_reponse['server'],
                    'photo': vk_reponse['photo'],
                    'hash': vk_reponse['hash'],
                    'user_id': vk_user_id,
-                   'caption': 'Random comics'})
+                   'caption': 'Random comics',
+                   'group_id': group_id
+                   })
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     vk_reponse = call_vk_api('get', url, params, None)['response'][0]
 
     vk_media_id = vk_reponse['id']
     vk_owner_id = vk_reponse['owner_id']
+    params = base_params.copy()
     params.update({'message': comic_file['comments'],
                    'owner_id': f'-{group_id}',
                    'from_group': '1',
-                   'attachments': f'photo{vk_owner_id}_{vk_media_id}'})
-    del params['server'], \
-        params['photo'], \
-        params['hash'], \
-        params['caption'], \
-        params['user_id'], \
-        params['group_id']
+                   'attachments': f'photo{vk_owner_id}_{vk_media_id}'
+                   })
     url = 'https://api.vk.com/method/wall.post'
     vk_reponse = call_vk_api('get', url, params, None)
     del_path = pathlib.Path(img_path)
